@@ -17,7 +17,8 @@ void main() async {
 }
 
 class DineInDia extends StatelessWidget {
-  const DineInDia({super.key});
+  const DineInDia({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -27,23 +28,35 @@ class DineInDia extends StatelessWidget {
             builder: (context) => Material(
               child: FlutterEasyLoading(
                 child: ResponsiveBreakpoints.builder(
-                    breakpoints: [
-                      const Breakpoint(start: 0, end: 390, name: MOBILE),
-                      const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                      const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-                    ],
-                    child: MaxWidthBox(
-                      maxWidth: 1921,
-                      child: Builder(builder: (context) {
-                        return ResponsiveScaledBox(
-                            width: ResponsiveValue<double>(context, conditionalValues: [
+                  breakpoints: [
+                    const Breakpoint(start: 0, end: 390, name: MOBILE),
+                    const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                    const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+                  ],
+                  child: MaxWidthBox(
+                    maxWidth: 1921,
+                    child: Builder(builder: (context) {
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double width = constraints.maxWidth;
+                          final double responsiveWidth = ResponsiveValue<double>(
+                            context,
+                            conditionalValues: [
                               Condition.between(start: 0, end: 400, value: 450),
                               Condition.between(start: 800, end: 1100, value: 1100),
                               Condition.between(start: 1000, end: 1200, value: 1000),
-                            ]).value,
-                            child: child ?? const Splash());
-                      }),
-                    )),
+                            ],
+                            defaultValue: width, // Use maxWidth as default
+                          ).value;
+                          return ResponsiveScaledBox(
+                            width: responsiveWidth > 0 ? responsiveWidth : width, // Ensure width is always positive
+                            child: child ?? const Splash(),
+                          );
+                        },
+                      );
+                    }),
+                  ),
+                ),
               ),
             ),
           ),
